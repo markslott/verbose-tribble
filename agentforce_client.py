@@ -36,6 +36,11 @@ class AgentforceClient:
             auth_manager: An instance of AuthManager for handling authentication.
         """
         self.auth_manager = auth_manager
+        self.client = httpx.AsyncClient(base_url=AGENTFORCE_BASE_URL, timeout=None)
+        
+    async def close(self):
+        await self.client.aclose()
+
 
     async def _authenticated_request(self, method: str, url: str, **kwargs) -> httpx.Response:
         """
@@ -184,3 +189,6 @@ class AgentforceClient:
         """
         url = f"/einstein/ai-agent/v1/sessions/{session_id}"
         await self._authenticated_request("DELETE", url, headers={"x-session-end-reason": "UserRequest"})
+        
+    async def __exit__(self, exc_type, exc_value, traceback):
+        await self.client.aclose()
